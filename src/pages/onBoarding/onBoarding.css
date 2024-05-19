@@ -1,0 +1,12 @@
+/* Add your custom styles here */
+.carousel {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .carousel-item {
+    scroll-snap-align: start;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
