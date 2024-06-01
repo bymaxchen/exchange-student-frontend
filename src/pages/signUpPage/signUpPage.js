@@ -1,166 +1,115 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Button, Typography, Link, Collapse  }  from "@material-tailwind/react";
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../AuthContext';
-import { Form, Input, Button, DatePicker, Radio } from 'antd';
-import PasswordChecklist from 'react-password-checklist';
-import axios from 'axios'; // Ensure axios is installed
-import moment from 'moment'; // Ensure moment is installed
 
-import './signUpPage.css';
+const whiteListDomains = ['edu.cn', 'sweden.edu']; // Add your white-listed domains here
 
-function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [firstname, setFirstName] = useState('');
-  const [lastname, setLastName] = useState('');
-  const [gender, setGender] = useState('');
-  const [birthdate, setbirthdate] = useState(null);
-  const [password, setPassword] = useState('');
-  const [passwordAgain, setPasswordAgain] = useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [isFormFilled, setIsFormFilled] = useState(false);
-  const { login } = useContext(AuthContext);
+export default function SignUpPage() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [showHelpMessage, setShowHelpMessage] = useState(false);
+  const [collapseOpen, setCollapseOpen] = useState(true);
+  
+  
 
-  useEffect(() => {
-    const arePasswordsMatching = password && password === passwordAgain;
-    const isAllFieldsFilled = email && username && firstname && lastname && birthdate && arePasswordsMatching;
-    setIsButtonDisabled(!isAllFieldsFilled);
-  }, [email, username, firstname, lastname, gender, birthdate, password, passwordAgain]);
-
-  const handleSubmit = async () => {
-    setLoading(true);
-
-    // real one
-    const formData = {
-      email,
-      username,
-      firstname,
-      lastname,
-      gender,
-      birthdate: birthdate ? moment(birthdate).format('YYYY-MM-DD') : null,
-      password,
-    };
-
-    // // experimental
-    // const formData = {
-    //   // id: "g",
-    //   name: username,
-    //   email: email,
-    //   // birthdate: birthdate ? moment(birthdate).format('YYYY-MM-DD') : null,
-    //   password: password,
-    // };
-
-    try {
-      // Substitute 'http://localhost:8081/api/signup' with your actual backend endpoint
-      const response = await axios.post('/api/users/register', formData);
-      console.log(response.data);
-      await login({ email, password }); // Auto-login after registration
-      navigate('/home'); // Redirect upon successful signup, replace '/success' with your route
-    } catch (error) {
-      console.error(error.response || error.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
+  const handleEmailChange = (e) => {
+      setEmail(e.target.value);
+      setShowHelpMessage(false); // Reset the help message on change
+  };
+
+  const handleEmailBlur = () => {
+      const domain = email.split('@')[1];
+      if (email && !whiteListDomains.includes(domain)) {
+          setShowHelpMessage(true);
+      } else {
+          setShowHelpMessage(false);
+      }
+  };
+
+  const handleSendCodeClick = () => {
+    // Logic to send code
+  };  
+
   return (
-    <div className="signup-container">
-      <div className="form-container-sign-up">
-        <div className='form-section-sign-up'>
-          <h1 className='form-header-signup'>Sign Up</h1>
-          <Form
-            layout='vertical'
-            name="signup"
-            className="signup-form"
-            initialValues={{ remember: true }}
-            onFinish={handleSubmit}
-          >
-            <Form.Item className="signup-form-item" label="Email" required tooltip="This is a required field">
-              <Input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            </Form.Item>
+      <div className="flex flex-col justify-between h-screen p-8">
+          <div className="w-full max-w-md mx-auto">
+              <div className="flex items-center mb-8">
+                  <button onClick={handleBackClick} className="text-gray-500">
+                      &#x2190; {/* Unicode for left arrow */}
+                  </button>
+                  <Typography variant="h5" className="flex-grow text-center">
+                      Sign Up
+                  </Typography>
+              </div>
+              <div>
+                  <Typography variant="h5" className="mb-2">
+                      What's your university email?
+                  </Typography>
+                  <Typography variant="h6" className="mb-7 text-gray-500">
+                      To explore the international student network of Wings Link, you need to enter the email address that your university assigned to you.
+                  </Typography>
+                  <input
+                      type="email"
+                      placeholder="name@edu.cn"
+                      value={email}
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}              
+                      className="w-full border-b-2 border-gray-300 focus:border-blue-500 outline-none mb-6"
+                  />
+                    {showHelpMessage && (
+                        <div className="mb-6">
+                            <Typography variant="paragraph">
+                                It looks like your university isn't on our list of eligible institutions for Wings Link. Please ensure your email was entered correctly.
+                            </Typography>
+                            <div>
+                                <hr className="my-4 border-gray-300" />
 
-            <Form.Item className="signup-form-item" label="Username" required tooltip="This is a required field">
-              <Input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-            </Form.Item>
+                                <div className='pl-4'>
+                                  <Typography
+                                      variant="h6"
+                                      className="cursor-pointer"
+                                      onClick={() => setCollapseOpen(!collapseOpen)}
+                                  >                                     
+                                  <strong>Which university is eligible?</strong>
+                                  </Typography>
+                                  
+                                  <Collapse open={collapseOpen}>
+                                      <Typography variant="paragraph">
+                                          Wings Link is available for all universities in Sweden and China.
+                                      </Typography>
+                                  </Collapse>
+                                </div>
 
-            <Form.Item className="signup-form-item" label="First Name" required tooltip="This is a required field">
-              <Input placeholder="First Name" value={firstname} onChange={e => setFirstName(e.target.value)} />
-            </Form.Item>
-
-            <Form.Item className="signup-form-item" label="Last Name" required tooltip="This is a required field">
-              <Input placeholder="Last Name" value={lastname} onChange={e => setLastName(e.target.value)} />
-            </Form.Item>
-
-            <Form.Item className="signup-form-item" label="Gender">
-              <Radio.Group value={gender} onChange={e => setGender(e.target.value)}>
-                <Radio value="female">Female</Radio>
-                <Radio value="male">Male</Radio>
-                <Radio value="other">Other</Radio>
-              </Radio.Group>
-            </Form.Item>
-
-            <Form.Item className="signup-form-item" label="Birthdate" required tooltip="This is a required field">
-              <DatePicker onChange={date => setbirthdate(date)} />
-            </Form.Item>
-
-            <Form.Item className="signup-form-item" name="password" label="Password" required tooltip="This is a required field"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your password!',
-                },
-              ]}
-            >
-              <Input.Password
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
-            </Form.Item>
-
-            <PasswordChecklist
-              rules={["minLength", "specialChar", "number", "capital"]}
-              minLength={10}
-              value={password}
-              valueAgain={passwordAgain}
-              onChange={isValid => {}}
-            />
-
-            <Form.Item className="signup-form-item" name="confirm" label="Confirm Password" required tooltip="This is a required field" dependencies={["password"]}
-              rules={[
-                  {
-                    required: true,
-                    message: 'Please confirm your password!',
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('password') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error('The passwords that you entered do not match!'));
-                    },
-                  }),
-                ]}
-            >
-              <Input.Password
-                placeholder="Confirm Password"
-                value={passwordAgain}
-                onChange={e => setPasswordAgain(e.target.value)}
-              />
-            </Form.Item>
-
-            <Form.Item className="signup-form-item">
-            <Button type="primary" htmlType="submit" disabled={isButtonDisabled || loading}>
-                Create Account
+                                
+                            </div>                            
+                        </div>
+                    )}                
+              </div>
+          </div>
+          <div className="w-full max-w-md mx-auto">
+              <Typography variant="h6" className="mb-4 text-center">
+                      We will send you a code to your email.
+              </Typography>            
+              <Button
+                  fullWidth
+                  color="black"
+                  onClick={handleSendCodeClick}
+                  className="mb-4"
+              >
+                  Send Me Code
               </Button>
-            </Form.Item>
-          </Form>
-        </div>
+              <Button
+                  fullWidth
+                  color="blue-gray"
+                  onClick={handleSendCodeClick}
+              >
+                  Don’t have a university email?
+              </Button>
+          </div>
       </div>
-    </div>
   );
 }
-
-export default SignUpPage;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography, Button  } from "@material-tailwind/react";
 import { Carousel } from 'react-responsive-carousel';
+import { Link } from 'react-router-dom';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 
@@ -44,11 +45,11 @@ export default function OnBoardingPage() {
                     </div>
             </Carousel>
             <div className="flex flex-col items-center pb-8">
-                <Button
-                    className="w-4/5 mb-4"
-                >
-                    Sign Up
-                </Button>
+                <Link to="/signup" className="w-4/5 mb-4">
+                    <Button className="w-full">
+                        Sign Up                
+                    </Button>
+                </Link>
                 <Typography
                     variant="lead"
                     className="text-center"
