@@ -55,9 +55,9 @@ export default function OnBoardingPage() {
                     className="text-center"
                 >
                     Already have an account?                 
-                    <a href="#" className="text-blue-500">
+                    <Link to="/signin" className="text-blue-500">
                         Log in
-                    </a>
+                    </Link>
                 </Typography>
             </div>    
         </div>
